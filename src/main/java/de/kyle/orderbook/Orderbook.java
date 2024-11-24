@@ -33,8 +33,10 @@ public class Orderbook {
     private final Lock bidLock = new ReentrantLock();
     private final Lock askLock = new ReentrantLock();
     private final Lock clientLock = new ReentrantLock();
+    private final Lock orderbookRunningLock = new ReentrantLock();
 
-    private boolean shouldMatch;
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private boolean orderbookAlive;
 
     public Orderbook(AssetTicker ticker) {
         this.ticker = ticker;
@@ -44,17 +46,13 @@ public class Orderbook {
 
         this.clients = new HashSet<>();
 
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(() -> {
-            if (shouldMatch) {
-                this.match();
-            } else {
-                scheduler.shutdown();
-            }
-        }, 0, 50, TimeUnit.MILLISECONDS);
+        start();
     }
 
     public void register(OrderbookClient client) {
+        if (!isOrderbookAlive()) {
+            throw new IllegalStateException("Orderbook is not alive; Start the orderbook to register a client");
+        }
         this.clientLock.lock();
         try {
             this.clients.add(client);
@@ -65,6 +63,9 @@ public class Orderbook {
     }
 
     public void unregister(OrderbookClient client) {
+        if (!isOrderbookAlive()) {
+            throw new IllegalStateException("Orderbook is not alive; Start the orderbook to unregister a client");
+        }
         this.clientLock.lock();
         try {
             this.clients.remove(client);
@@ -75,6 +76,9 @@ public class Orderbook {
     }
 
     public void place(DefaultOrderbookClient client, OrderRequest orderRequest) {
+        if (!isOrderbookAlive()){
+            throw new IllegalStateException("Orderbook is not alive; Start the orderbook to place an order");
+        }
         clientLock.lock();
         try {
             if (!this.clients.contains(client)) {
@@ -153,8 +157,55 @@ public class Orderbook {
         }
     }
 
+    private boolean isOrderbookAlive() {
+        this.orderbookRunningLock.lock();
+        try {
+            return this.orderbookAlive;
+        } finally {
+            this.orderbookRunningLock.unlock();
+        }
+    }
+
+    private void setOrderbookAlive(boolean running) {
+        this.orderbookRunningLock.lock();
+        try {
+            this.orderbookAlive = running;
+        } finally {
+            this.orderbookRunningLock.unlock();
+        }
+    }
+
+    public void start() {
+        if (isOrderbookAlive()) {
+            throw new IllegalStateException("Orderbook is already alive");
+        }
+        setOrderbookAlive(true);
+        scheduler.scheduleAtFixedRate(() -> {
+            if (orderbookAlive) {
+                this.match();
+            } else {
+                scheduler.shutdown();
+            }
+        }, 0, 50, TimeUnit.MILLISECONDS);
+    }
+
     public void shutdown() {
-        this.shouldMatch = false;
+        setOrderbookAlive(false);
+        this.bidLock.lock();
+        this.askLock.lock();
+        this.clientLock.lock();
+        try {
+            this.bidQueue.clear();
+            this.askQueue.clear();
+            for (OrderbookClient client : this.clients) {
+                client.onUnregister();
+            }
+            this.clients.clear();
+        } finally {
+            this.bidLock.unlock();
+            this.askLock.unlock();
+            this.clientLock.unlock();
+        }
     }
 
     private void callOrderPlaceEvent(OrderPlaceEvent event) {
