@@ -32,7 +32,7 @@ public record Order(
             return valueComparison;
         }
 
-        int quantityComparison = Integer.compare(this.quantity, o.quantity);
+        int quantityComparison = Integer.compare(o.quantity, this.quantity);
         if (quantityComparison != 0) {
             return quantityComparison;
         }
