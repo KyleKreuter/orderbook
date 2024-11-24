@@ -21,11 +21,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Getter
+
 public class Orderbook {
     private final AssetTicker ticker;
-
+    @Getter
     private final PriorityQueue<Order> bidQueue;
+    @Getter
     private final PriorityQueue<Order> askQueue;
 
     private final Set<OrderbookClient> clients;
@@ -33,7 +34,7 @@ public class Orderbook {
     private final Lock bidLock = new ReentrantLock();
     private final Lock askLock = new ReentrantLock();
     private final Lock clientLock = new ReentrantLock();
-    private final Lock orderbookRunningLock = new ReentrantLock();
+    private final Lock orderbookAliveLock = new ReentrantLock();
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private boolean orderbookAlive;
@@ -45,8 +46,6 @@ public class Orderbook {
         this.askQueue = new PriorityQueue<>(Order::compareTo);
 
         this.clients = new HashSet<>();
-
-        start();
     }
 
     public void register(OrderbookClient client) {
@@ -76,7 +75,7 @@ public class Orderbook {
     }
 
     public void place(DefaultOrderbookClient client, OrderRequest orderRequest) {
-        if (!isOrderbookAlive()){
+        if (!isOrderbookAlive()) {
             throw new IllegalStateException("Orderbook is not alive; Start the orderbook to place an order");
         }
         clientLock.lock();
@@ -158,20 +157,20 @@ public class Orderbook {
     }
 
     private boolean isOrderbookAlive() {
-        this.orderbookRunningLock.lock();
+        this.orderbookAliveLock.lock();
         try {
             return this.orderbookAlive;
         } finally {
-            this.orderbookRunningLock.unlock();
+            this.orderbookAliveLock.unlock();
         }
     }
 
     private void setOrderbookAlive(boolean running) {
-        this.orderbookRunningLock.lock();
+        this.orderbookAliveLock.lock();
         try {
             this.orderbookAlive = running;
         } finally {
-            this.orderbookRunningLock.unlock();
+            this.orderbookAliveLock.unlock();
         }
     }
 
@@ -181,8 +180,8 @@ public class Orderbook {
         }
         setOrderbookAlive(true);
         scheduler.scheduleAtFixedRate(() -> {
-            if (orderbookAlive) {
-                this.match();
+            if (isOrderbookAlive()) {
+                match();
             } else {
                 scheduler.shutdown();
             }

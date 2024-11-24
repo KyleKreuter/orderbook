@@ -13,15 +13,22 @@ import java.util.UUID;
 public class OrderbookTest {
 
     @Test
-    public void test_matching_limit_order() {
+    public void test_matching_limit_order() throws InterruptedException {
         DefaultOrderbookClient orderClient = new DefaultOrderbookClient(UUID.randomUUID());
         Orderbook orderbook = new Orderbook(AssetTicker.KCJK);
+        orderbook.start();
         orderbook.register(orderClient);
         orderbook.place(orderClient, new OrderRequest(
                 ImplicitOrderType.BID,
                 OrderType.LMT,
                 5,
                 100
+        ));
+        orderbook.place(orderClient, new OrderRequest(
+                ImplicitOrderType.BID,
+                OrderType.MKT,
+                30,
+                110
         ));
         orderbook.place(orderClient, new OrderRequest(
                 ImplicitOrderType.ASK,
@@ -35,15 +42,10 @@ public class OrderbookTest {
                 20,
                 120
         ));
-        orderbook.place(orderClient, new OrderRequest(
-                ImplicitOrderType.BID,
-                OrderType.MKT,
-                30,
-                110
-        ));
-        orderbook.match();
-        Assertions.assertEquals(1, orderbook.getAskQueue().size());
-        Assertions.assertEquals(2, orderbook.getBidQueue().size());
+        Thread.sleep(150);
+        Assertions.assertEquals(0, orderbook.getAskQueue().size());
+        Assertions.assertEquals(1, orderbook.getBidQueue().size());
+        orderbook.unregister(orderClient);
         orderbook.shutdown();
     }
 }
