@@ -267,7 +267,7 @@ public class Orderbook {
         if (ask.orderType().equals(OrderType.MKT)) {
             return bid.value();
         }
-        return ask.value();
+        return (bid.value() + ask.value()) / 2;
     }
 
     private boolean canMatch(Order bid, Order ask) {
