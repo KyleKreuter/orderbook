@@ -1,8 +1,8 @@
-package de.kyle.orderbook.core.order.event;
+package de.kyle.orderbook.order.event;
 
-import de.kyle.orderbook.core.asset.AssetTicker;
-import de.kyle.orderbook.core.client.OrderbookClient;
-import de.kyle.orderbook.core.order.type.ImplicitOrderType;
+import de.kyle.orderbook.asset.AssetTicker;
+import de.kyle.orderbook.client.OrderbookClient;
+import de.kyle.orderbook.order.type.ImplicitOrderType;
 
 import java.time.LocalDateTime;
 

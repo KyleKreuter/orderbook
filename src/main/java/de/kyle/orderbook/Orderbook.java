@@ -1,14 +1,13 @@
-package de.kyle.orderbook.core;
+package de.kyle.orderbook;
 
-import de.kyle.orderbook.core.asset.AssetTicker;
-import de.kyle.orderbook.core.client.DefaultOrderbookClient;
-import de.kyle.orderbook.core.client.OrderbookClient;
-import de.kyle.orderbook.core.order.Order;
-import de.kyle.orderbook.core.order.event.OrderExecutionEvent;
-import de.kyle.orderbook.core.order.event.OrderPlaceEvent;
-import de.kyle.orderbook.core.order.request.OrderRequest;
-import de.kyle.orderbook.core.order.type.ImplicitOrderType;
-import de.kyle.orderbook.core.order.type.OrderType;
+import de.kyle.orderbook.asset.AssetTicker;
+import de.kyle.orderbook.client.OrderbookClient;
+import de.kyle.orderbook.order.Order;
+import de.kyle.orderbook.order.event.OrderExecutionEvent;
+import de.kyle.orderbook.order.event.OrderPlaceEvent;
+import de.kyle.orderbook.order.request.OrderRequest;
+import de.kyle.orderbook.order.type.ImplicitOrderType;
+import de.kyle.orderbook.order.type.OrderType;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

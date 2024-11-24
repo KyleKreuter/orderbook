@@ -1,4 +1,4 @@
-package de.kyle.orderbook.core.asset;
+package de.kyle.orderbook.asset;
 
 public enum AssetTicker {
     KCJK,

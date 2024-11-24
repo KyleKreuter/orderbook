@@ -1,11 +1,10 @@
 package de.kyle.orderbook;
 
-import de.kyle.orderbook.core.Orderbook;
-import de.kyle.orderbook.core.asset.AssetTicker;
-import de.kyle.orderbook.core.client.DefaultOrderbookClient;
-import de.kyle.orderbook.core.order.request.OrderRequest;
-import de.kyle.orderbook.core.order.type.ImplicitOrderType;
-import de.kyle.orderbook.core.order.type.OrderType;
+import de.kyle.orderbook.asset.AssetTicker;
+import de.kyle.orderbook.client.DefaultOrderbookClient;
+import de.kyle.orderbook.order.request.OrderRequest;
+import de.kyle.orderbook.order.type.ImplicitOrderType;
+import de.kyle.orderbook.order.type.OrderType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
