@@ -1,13 +1,13 @@
 package de.kyle.orderbook.core.order;
 
-import de.kyle.orderbook.core.client.DefaultOrderbookClient;
+import de.kyle.orderbook.core.client.OrderbookClient;
 import de.kyle.orderbook.core.order.type.ImplicitOrderType;
 import de.kyle.orderbook.core.order.type.OrderType;
 
 import java.time.LocalDateTime;
 
 public record Order(
-        DefaultOrderbookClient client,
+        OrderbookClient client,
         ImplicitOrderType implicitOrderType,
         OrderType orderType,
         int quantity,

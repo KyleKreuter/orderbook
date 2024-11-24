@@ -101,7 +101,7 @@ public class Orderbook {
         client.onUnregister();
     }
 
-    public void place(DefaultOrderbookClient client, OrderRequest orderRequest) {
+    public void place(OrderbookClient client, OrderRequest orderRequest) {
         if (!isOrderbookAlive()) {
             throw new IllegalStateException("Orderbook is not alive; Start the orderbook to place an order");
         }
@@ -340,7 +340,7 @@ public class Orderbook {
                                       int askQuantity,
                                       float executionPrice,
                                       PriorityQueue<Order> bidQueue,
-                                      DefaultOrderbookClient client,
+                                      OrderbookClient client,
                                       ImplicitOrderType implicitOrderType,
                                       OrderType orderType,
                                       float value) {
