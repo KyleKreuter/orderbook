@@ -207,7 +207,6 @@ public class Orderbook {
             throw new IllegalStateException("Orderbook is already alive");
         }
         setOrderbookAlive(true);
-        log.info("Order matching was started");
         scheduler.scheduleAtFixedRate(() -> {
             if (isOrderbookAlive()) {
                 match();
@@ -215,6 +214,7 @@ public class Orderbook {
                 scheduler.shutdown();
             }
         }, 0, 50, TimeUnit.MILLISECONDS);
+        log.info("Order matching was started");
     }
 
     public void shutdown() {
