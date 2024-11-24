@@ -1,4 +1,4 @@
-package de.kyle.orderbook.order.type;
+package de.kyle.orderbook.core.order.type;
 
 public enum ImplicitOrderType {
     ASK,

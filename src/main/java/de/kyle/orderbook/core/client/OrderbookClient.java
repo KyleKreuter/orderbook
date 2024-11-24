@@ -1,7 +1,7 @@
-package de.kyle.orderbook.client;
+package de.kyle.orderbook.core.client;
 
-import de.kyle.orderbook.order.event.OrderExecutionEvent;
-import de.kyle.orderbook.order.event.OrderPlaceEvent;
+import de.kyle.orderbook.core.order.event.OrderExecutionEvent;
+import de.kyle.orderbook.core.order.event.OrderPlaceEvent;
 
 import java.util.UUID;
 

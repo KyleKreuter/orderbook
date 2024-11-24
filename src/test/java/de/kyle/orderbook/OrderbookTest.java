@@ -1,19 +1,24 @@
 package de.kyle.orderbook;
 
-import de.kyle.orderbook.asset.AssetTicker;
-import de.kyle.orderbook.client.DefaultOrderbookClient;
-import de.kyle.orderbook.order.request.OrderRequest;
-import de.kyle.orderbook.order.type.ImplicitOrderType;
-import de.kyle.orderbook.order.type.OrderType;
+import de.kyle.orderbook.core.Orderbook;
+import de.kyle.orderbook.core.asset.AssetTicker;
+import de.kyle.orderbook.core.client.DefaultOrderbookClient;
+import de.kyle.orderbook.core.order.request.OrderRequest;
+import de.kyle.orderbook.core.order.type.ImplicitOrderType;
+import de.kyle.orderbook.core.order.type.OrderType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
 public class OrderbookTest {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderbookTest.class);
+
     @Test
-    public void test_matching_limit_order() throws InterruptedException {
+    public void test_order_matching() throws InterruptedException {
         DefaultOrderbookClient orderClient = new DefaultOrderbookClient(UUID.randomUUID());
         Orderbook orderbook = new Orderbook(AssetTicker.KCJK);
         orderbook.start();
@@ -45,6 +50,7 @@ public class OrderbookTest {
         Thread.sleep(150);
         Assertions.assertEquals(0, orderbook.getAskQueue().size());
         Assertions.assertEquals(1, orderbook.getBidQueue().size());
+        Assertions.assertEquals(120.0,orderbook.getLastTradedPrice());
         orderbook.unregister(orderClient);
         orderbook.shutdown();
     }

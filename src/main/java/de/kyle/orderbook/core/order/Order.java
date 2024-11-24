@@ -1,8 +1,8 @@
-package de.kyle.orderbook.order;
+package de.kyle.orderbook.core.order;
 
-import de.kyle.orderbook.client.DefaultOrderbookClient;
-import de.kyle.orderbook.order.type.ImplicitOrderType;
-import de.kyle.orderbook.order.type.OrderType;
+import de.kyle.orderbook.core.client.DefaultOrderbookClient;
+import de.kyle.orderbook.core.order.type.ImplicitOrderType;
+import de.kyle.orderbook.core.order.type.OrderType;
 
 import java.time.LocalDateTime;
 

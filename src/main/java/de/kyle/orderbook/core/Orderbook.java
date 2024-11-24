@@ -1,14 +1,14 @@
-package de.kyle.orderbook;
+package de.kyle.orderbook.core;
 
-import de.kyle.orderbook.asset.AssetTicker;
-import de.kyle.orderbook.client.DefaultOrderbookClient;
-import de.kyle.orderbook.client.OrderbookClient;
-import de.kyle.orderbook.order.Order;
-import de.kyle.orderbook.order.event.OrderExecutionEvent;
-import de.kyle.orderbook.order.event.OrderPlaceEvent;
-import de.kyle.orderbook.order.request.OrderRequest;
-import de.kyle.orderbook.order.type.ImplicitOrderType;
-import de.kyle.orderbook.order.type.OrderType;
+import de.kyle.orderbook.core.asset.AssetTicker;
+import de.kyle.orderbook.core.client.DefaultOrderbookClient;
+import de.kyle.orderbook.core.client.OrderbookClient;
+import de.kyle.orderbook.core.order.Order;
+import de.kyle.orderbook.core.order.event.OrderExecutionEvent;
+import de.kyle.orderbook.core.order.event.OrderPlaceEvent;
+import de.kyle.orderbook.core.order.request.OrderRequest;
+import de.kyle.orderbook.core.order.type.ImplicitOrderType;
+import de.kyle.orderbook.core.order.type.OrderType;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +38,11 @@ public class Orderbook {
     private final Lock askLock = new ReentrantLock();
     private final Lock clientLock = new ReentrantLock();
     private final Lock orderbookAliveLock = new ReentrantLock();
+    private final Lock lastTradedPriceLock = new ReentrantLock();
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private boolean orderbookAlive;
+    private float lastTradedPrice;
 
     public Orderbook(AssetTicker ticker) {
         this.ticker = ticker;
@@ -51,6 +53,24 @@ public class Orderbook {
         this.clients = new HashSet<>();
         log.info("Orderbook was initiated");
         log.info("Waiting to start the order matching...");
+    }
+
+    public float getLastTradedPrice() {
+        lastTradedPriceLock.lock();
+        try {
+            return lastTradedPrice;
+        } finally {
+            lastTradedPriceLock.unlock();
+        }
+    }
+
+    private void setLastTradedPrice(float price) {
+        lastTradedPriceLock.lock();
+        try {
+            lastTradedPrice = price;
+        } finally {
+            lastTradedPriceLock.unlock();
+        }
     }
 
     public void register(OrderbookClient client) {
@@ -262,7 +282,7 @@ public class Orderbook {
         int bidQuantity = bid.quantity();
         int askQuantity = ask.quantity();
         float executionPrice = getExecutionPrice(bid, ask);
-
+        setLastTradedPrice(executionPrice);
         if (bidQuantity > askQuantity) {
             processPartExecution(
                     bid,
