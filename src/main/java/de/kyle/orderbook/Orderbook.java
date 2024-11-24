@@ -10,6 +10,8 @@ import de.kyle.orderbook.order.request.OrderRequest;
 import de.kyle.orderbook.order.type.ImplicitOrderType;
 import de.kyle.orderbook.order.type.OrderType;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -23,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class Orderbook {
+    private static final Logger log = LoggerFactory.getLogger(Orderbook.class);
     private final AssetTicker ticker;
     @Getter
     private final PriorityQueue<Order> bidQueue;
@@ -46,6 +49,8 @@ public class Orderbook {
         this.askQueue = new PriorityQueue<>(Order::compareTo);
 
         this.clients = new HashSet<>();
+        log.info("Orderbook was initiated");
+        log.info("Waiting to start the order matching...");
     }
 
     public void register(OrderbookClient client) {
@@ -58,6 +63,7 @@ public class Orderbook {
         } finally {
             this.clientLock.unlock();
         }
+        log.info("Registered client {}", client.getId());
         client.onRegister();
     }
 
@@ -71,6 +77,7 @@ public class Orderbook {
         } finally {
             this.clientLock.unlock();
         }
+        log.info("Unregistered client {}", client.getId());
         client.onUnregister();
     }
 
@@ -103,6 +110,7 @@ public class Orderbook {
                 } finally {
                     this.askLock.unlock();
                 }
+                log.info("ASK order for {}@{} was placed by {}", order.quantity(), order.value(), client.getId());
                 callOrderPlaceEvent(new OrderPlaceEvent(
                         client,
                         orderRequest.implicitOrderType(),
@@ -120,6 +128,7 @@ public class Orderbook {
                 } finally {
                     this.bidLock.unlock();
                 }
+                log.info("BID order for {}@{} was placed by {}", order.quantity(), order.value(), client.getId());
                 callOrderPlaceEvent(new OrderPlaceEvent(
                         client,
                         orderRequest.implicitOrderType(),
@@ -179,6 +188,7 @@ public class Orderbook {
             throw new IllegalStateException("Orderbook is already alive");
         }
         setOrderbookAlive(true);
+        log.info("Order matching was started");
         scheduler.scheduleAtFixedRate(() -> {
             if (isOrderbookAlive()) {
                 match();
@@ -205,6 +215,8 @@ public class Orderbook {
             this.askLock.unlock();
             this.clientLock.unlock();
         }
+        log.info("All bid/ask orders and clients were removed");
+        log.info("Orderbook is shut down");
     }
 
     private void callOrderPlaceEvent(OrderPlaceEvent event) {

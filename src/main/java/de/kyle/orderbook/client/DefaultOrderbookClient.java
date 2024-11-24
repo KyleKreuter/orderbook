@@ -3,14 +3,15 @@ package de.kyle.orderbook.client;
 import de.kyle.orderbook.order.event.OrderExecutionEvent;
 import de.kyle.orderbook.order.event.OrderPlaceEvent;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.util.UUID;
 
 @RequiredArgsConstructor
 public class DefaultOrderbookClient implements OrderbookClient {
-    private static final Logger log = LogManager.getLogger(DefaultOrderbookClient.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultOrderbookClient.class);
     private final UUID id;
 
     @Override
